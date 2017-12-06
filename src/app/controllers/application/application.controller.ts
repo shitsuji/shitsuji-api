@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { DatabaseService } from '../../services/database/database.service';
 
-@Controller('/application')
+@Controller('/applications')
 export class ApplicationController {
   constructor(private databaseService: DatabaseService) {}
 
