@@ -1,0 +1,27 @@
+version: "3.3"
+
+services:
+  db:
+    image: orientdb:2.2.30
+    ports: 
+      - "2424:2424"
+      - "2480:2480"
+    environment: 
+      ORIENTDB_ROOT_PASSWORD: shitsuji
+    volumes:
+      - db_config:/orientdb/config
+      - db_data:/orientdb/databases
+      - db_backup:/orientdb/backup 
+  # app:
+  #   build: .
+  #   depends_on:
+  #     - db
+  #   ports:
+  #     - "5000:5000"
+  #   volumes:
+  #     - .:/shitsuji
+
+volumes:
+  db_config:
+  db_data:
+  db_backup:
