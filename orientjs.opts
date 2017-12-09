@@ -1,0 +1,8 @@
+
+--host=localhost
+--port=2424
+--user=root
+--password=shitsuji
+--dbname=shitsuji
+--dbuser=root
+--dbpassword=shitsuji

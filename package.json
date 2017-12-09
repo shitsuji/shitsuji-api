@@ -1,6 +1,6 @@
 {
   "name": "shitsuji",
-  "version": "2.0.0",
+  "version": "0.0.1",
   "description": "執事 starter repository",
   "license": "MIT",
   "scripts": {
@@ -8,7 +8,10 @@
     "test": "mocha src/**/*.spec.ts --require ts-node/register --reporter spec",
     "start": "node index.js",
     "watch": "tsc -w",
-    "serve": "nodemon -e ts -L --watch src --exec \"npm run build && npm run start\" "
+    "serve": "nodemon -e ts -L --watch src --exec \"npm run build && npm run start\" ",
+    "debug": "nodemon -e ts -L --watch src --exec \"npm run build && npm run start\" ",
+    "db:create": "orientjs db create shitsuji graph plocal",
+    "migration:up": "orientjs migration up"
   },
   "dependencies": {
     "@nestjs/common": "^4.4.2",

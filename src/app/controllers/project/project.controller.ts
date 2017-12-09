@@ -27,4 +27,9 @@ export class ProjectController {
       return error;
     }
   }
+
+  @Get('/:projectId/applications')
+  async getProjectApplications(@Param() params: { projectId: string }) {
+    
+  }
 }
