@@ -1,23 +1,27 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { DatabaseService } from '../../services/database/database.service';
 
 @Controller('projects')
 export class ProjectController {
-
   constructor(private databaseService: DatabaseService) {}
 
   @Get('/')
-  async getAll() {
-    const projects = await this.databaseService.db
-    .select()
-    .from('Project')
-    .all();
+  async getAll(@Query('search') search: string) {
+    let projectsStatement = this.databaseService.db
+      .select()
+      .from('Project');
 
-    return projects;
+    if (search) {
+      projectsStatement = projectsStatement.containsText({
+        name: search
+      });
+    }
+
+    return projectsStatement.all();
   }
 
   @Get('/:projectId')
-  async getById(@Param() params: { projectId: string }) {
+  async getById(@Param('projectId', ()) projectId: { projectId: string }) {
     try {
       const project = await this.databaseService.db
         .record.get(`#${params.projectId}`);
@@ -26,10 +30,5 @@ export class ProjectController {
     } catch (error) {
       return error;
     }
-  }
-
-  @Get('/:projectId/applications')
-  async getProjectApplications(@Param() params: { projectId: string }) {
-    
   }
 }
