@@ -1,7 +1,7 @@
-const { createClass, createEdge } = require('./helpers');
+const { createClass, createEdge, createIndex } = require('./helpers');
 
 async function createSchema(db) {
-  const promises = [];
+  let promises = [];
 
   promises.push(createClass(db, 'Repository', null, [
     { name: 'url', type: 'String' }
@@ -18,8 +18,12 @@ async function createSchema(db) {
     { name: 'createdAt', type: 'Date' }
   ]));
 
+  await Promise.all(promises);  
+  promises = [];
+  
   promises.push(createClass(db, 'Application', 'V', [
     { name: 'name', type: 'String' },
+    { name: 'key', type: 'String' },
     { name: 'createdAt', type: 'Date' },
     { name: 'repository', type: 'Embedded', linkedClass: 'Repository'}
   ]));
@@ -30,10 +34,15 @@ async function createSchema(db) {
     { name: 'commit', type: 'Embedded', linkedClass: 'Commit'}
   ]));
 
-  const classes = await Promise.all(promises);
+  await Promise.all(promises);  
+  promises = [];
 
-  const partOf = await createEdge(db, 'PartOf', 'Application', 'Project');
-  const has = await createEdge(db, 'Has', 'Application', 'Version');
+  promises.push(createIndex(db, 'Project', ['name'], 'UNIQUE'));
+  promises.push(createIndex(db, 'Application', ['name', 'key'], 'UNIQUE'));
+  promises.push(createEdge(db, 'PartOf', 'Application', 'Project'));
+  promises.push(createEdge(db, 'Has', 'Application', 'Version'));
+  
+  await Promise.all(promises);  
 }
 
 exports.name = 'init';

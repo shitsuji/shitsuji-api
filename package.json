@@ -11,12 +11,13 @@
     "serve": "nodemon -e ts -L --watch src --exec \"npm run build && npm run start\" ",
     "debug": "nodemon -e ts -L --watch src --exec \"npm run build && npm run start\" ",
     "db:create": "orientjs db create shitsuji graph plocal",
-    "migration:up": "orientjs migration up"
+    "migrate:up": "orientjs migrate up"
   },
   "dependencies": {
     "@nestjs/common": "^4.4.2",
     "@nestjs/core": "^4.4.2",
     "@nestjs/microservices": "^4.4.1",
+    "@nestjs/swagger": "^1.1.2",
     "@nestjs/testing": "^4.4.1",
     "@nestjs/websockets": "^4.4.1",
     "cors": "^2.8.4",

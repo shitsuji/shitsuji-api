@@ -68,3 +68,14 @@ exports.createEdge = async function (db, name, from, to) {
     { name: 'out', type: 'Link', linkedClass: (typeof from !== 'string') ? from.name : from }
   ]);
 }
+
+exports.createIndex = async function (db, className, properites, type) {
+  const indexName = `${className}Index`;
+
+  return db.index.create({
+    name: indexName,
+    class: className,
+    properites,
+    type
+  });
+}
