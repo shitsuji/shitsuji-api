@@ -29,13 +29,7 @@ const DataTypes = {
 exports.DataTypes = DataTypes;
 
 exports.createClass = async function (db, name, superClass, config) {
-  let c;
-
-  try {
-    c = await db.class.get(name);
-  } catch (e) {
-    c = await db.class.create(name, superClass);
-  }
+  const c = await db.class.create(name, superClass);
 
   return Promise.all(config.map(async (conf) => {
     let prop = await c.property.get(conf.name);
@@ -69,13 +63,13 @@ exports.createEdge = async function (db, name, from, to) {
   ]);
 }
 
-exports.createIndex = async function (db, className, properites, type) {
+exports.createIndex = async function (db, className, properties, type) {
   const indexName = `${className}Index`;
 
   return db.index.create({
     name: indexName,
     class: className,
-    properites,
+    properties,
     type
   });
 }

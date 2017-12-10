@@ -4,13 +4,15 @@ async function createSchema(db) {
   let promises = [];
 
   promises.push(createClass(db, 'Repository', null, [
-    { name: 'url', type: 'String' }
+    { name: 'url', type: 'String' },
+    { name: 'createdAt', type: 'Date' }    
   ]));
 
   promises.push(createClass(db, 'Commit', null, [
     { name: 'author', type: 'String' },
     { name: 'createdAt', type: 'Date' },
-    { name: 'message', type: 'String' }
+    { name: 'message', type: 'String' },
+    { name: 'hash', type: 'String' }
   ]));
 
   promises.push(createClass(db, 'Project', 'V', [
@@ -25,11 +27,13 @@ async function createSchema(db) {
     { name: 'name', type: 'String' },
     { name: 'key', type: 'String' },
     { name: 'createdAt', type: 'Date' },
+    { name: 'isGenerated', type: 'Boolean' },
+    { name: 'isLegacy', type: 'Boolean' },
     { name: 'repository', type: 'Embedded', linkedClass: 'Repository'}
   ]));
 
   promises.push(createClass(db, 'Version', 'V', [
-    { name: 'name', type: 'String' },
+    { name: 'number', type: 'String' },
     { name: 'createdAt', type: 'Date' },
     { name: 'commit', type: 'Embedded', linkedClass: 'Commit'}
   ]));

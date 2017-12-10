@@ -23,14 +23,7 @@ export class ProjectController {
 
   @Get('/:projectId')
   async getById(@Param('projectId') projectId: string) {
-    try {
-      const project = await this.databaseService.db
-        .record.get(`#${projectId}`);
-
-      return project;
-    } catch (error) {
-      return error;
-    }
+    return this.databaseService.db.record.get(`#${projectId}`);
   }
 
   @Post('/')
@@ -41,5 +34,16 @@ export class ProjectController {
     } as any);
 
     return project;
+  }
+
+  @Get('/:projectId/applications')
+  async getApplications(@Param('projectId') projectId: string) {
+    return this.databaseService.db
+      .select('in(PartOf)')
+      .from('Project')
+      .where({
+        '@rid': `#${projectId}`
+      })
+      .all();
   }
 }

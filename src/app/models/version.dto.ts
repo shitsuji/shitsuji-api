@@ -1,5 +1,5 @@
 import { ApiModelProperty, ApiModelPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { CommitDto } from './commit.dto';
 
 export class VersionDto {
@@ -16,6 +16,13 @@ export class VersionDto {
   })
   @IsString()
   number: string;
+
+  @ApiModelProperty({
+    required: true,
+    type: Date
+  })
+  @IsDate()
+  createdAt: Date;
 
   @ApiModelPropertyOptional({
     type: CommitDto
