@@ -1,4 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import * as Bluebird from 'bluebird';
+import { Statement } from 'orientjs';
+import { ApplicationDto } from '../../models/application.dto';
 import { ProjectDto } from '../../models/project.dto';
 import { DatabaseService } from '../../services/database/database.service';
 
@@ -37,13 +40,28 @@ export class ProjectController {
   }
 
   @Get('/:projectId/applications')
-  async getApplications(@Param('projectId') projectId: string) {
+  async getApplications(@Param('projectId') projectId: string,
+    @Query('filter') filter: [{ applicationId: string, version: string }]) {
+    const applicationIds = filter.map((item) => item.applicationId);
+
     return this.databaseService.db
-      .select('in(PartOf)')
-      .from('Project')
-      .where({
-        '@rid': `#${projectId}`
-      })
+      .let('applications', this.databaseService.db
+        .select(`expand(in('PartOf'))`)
+        .from('Project')
+        .where({
+          '@rid': `#${projectId}`
+        })
+      )
+      .commit()
+      .return('$applications')
       .all();
+  }
+
+  @Post('/:projectId/applications')
+  async addAplication(@Param('projectId') projectId: string, @Body() applicationDto: ApplicationDto) {
+    return this.databaseService.db.create('EDGE', 'PartOf')
+      .from(`#${applicationDto['@rid']}`)
+      .to(`#${projectId}`)
+      .one();
   }
 }

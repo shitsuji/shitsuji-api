@@ -41,12 +41,18 @@ async function createSchema(db) {
   await Promise.all(promises);  
   promises = [];
 
+  promises.push(createEdge(db, 'Has', 'Application', 'Version'));
+  promises.push(createEdge(db, 'PartOf', 'Application', 'Project'));
+  
+  await Promise.all(promises);
+  promises = [];
+  
   promises.push(createIndex(db, 'Project', ['name'], 'UNIQUE'));
   promises.push(createIndex(db, 'Application', ['name', 'key'], 'UNIQUE'));
-  promises.push(createEdge(db, 'PartOf', 'Application', 'Project'));
-  promises.push(createEdge(db, 'Has', 'Application', 'Version'));
-  
-  await Promise.all(promises);  
+  promises.push(createIndex(db, 'Has', ['in', 'out'], 'UNIQUE'));
+  promises.push(createIndex(db, 'PartOf', ['in', 'out'], 'UNIQUE'));
+
+  await Promise.all(promises);
 }
 
 exports.name = 'init';

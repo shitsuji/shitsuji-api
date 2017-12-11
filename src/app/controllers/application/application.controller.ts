@@ -47,7 +47,7 @@ export class ApplicationController {
   @Get('/:applicationId/versions')
   async getVersions(@Param('applicationId') applicationId: string) {
     return this.databaseService.db
-      .select('in(Has)')
+      .select(`in('Has')`)
       .from('Application')
       .where({
         '@rid': `#${applicationId}`
