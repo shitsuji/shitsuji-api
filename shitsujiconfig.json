@@ -1,0 +1,5 @@
+{
+  "storagePath": "./storage",
+  "certPath": "./cert",
+  "certPassword": "1234567890"
+}
