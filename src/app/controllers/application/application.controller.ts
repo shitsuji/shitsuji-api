@@ -79,7 +79,7 @@ export class ApplicationController {
     // await this.repositoryService.cloneRepository('git@github.com:SimpleHumbleButler/Confidential.git', 'Confidential');
     // const result = await this.repositoryService.readVersion('Confidential', '8e7500e83769c4542f3e0f185c341b356530085c');
 
-    await this.repositoryService.cloneRepository('git@github.com:Rafal2228/decks.git', 'decks');
+    // await this.repositoryService.cloneRepository('git@github.com:Rafal2228/decks.git', 'decks');
     // console.log(result);
   }
 }

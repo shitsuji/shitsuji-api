@@ -8,6 +8,6 @@ EXPOSE 3000
 
 COPY . .
 
-RUN npm install node-gyp && npm install
+RUN npm install
 
 CMD [ "npm", "run", "serve" ]

@@ -15,10 +15,6 @@ export async function configFactory() {
   const config: ShitsujiConfig = { ...CONFIG_DEFAULTS, ...JSON.parse(configData) };
   config.storagePath = path.join(rootDir, config.storagePath);
 
-  if (config.certPath) {
-    config.certPath = path.join(rootDir, config.certPath);
-  }
-
   return config;
 }
 

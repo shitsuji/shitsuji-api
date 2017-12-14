@@ -1,22 +1,22 @@
 import {Test} from '@nestjs/testing';
 import {TestingModule} from '@nestjs/testing/testing-module';
 import {expect} from 'chai';
-import {VersionController} from './version.controller';
+import {RepositoryController} from './repository.controller';
 
-describe('VersionController', () => {
+describe('RepositoryController', () => {
   let module: TestingModule;
   beforeEach(() => {
     return Test.createTestingModule({
       controllers: [
-        VersionController
+        RepositoryController
       ]
     }).compile()
       .then((compiledModule) => module = compiledModule);
   });
 
-  let controller: VersionController;
+  let controller: RepositoryController;
   beforeEach(() => {
-    controller = module.get(VersionController);
+    controller = module.get(RepositoryController);
   });
 
   it('should exist', () => {

@@ -5,6 +5,5 @@ export const CONFIG = 'CONFIG';
 
 export const CONFIG_DEFAULTS: ShitsujiConfig = {
   storagePath: './storage',
-  certPath: './cert',
-  certPassword: '1234567890'
+  secret: 'there-should-be-stronger-secret...'
 };

@@ -1,25 +1,25 @@
 import {Test} from '@nestjs/testing';
 import {TestingModule} from '@nestjs/testing/testing-module';
+import {CryptoService} from './crypto.service';
 import {expect} from 'chai';
-import {VersionController} from './version.controller';
 
-describe('VersionController', () => {
+describe('CryptoService', () => {
   let module: TestingModule;
   beforeEach(() => {
     return Test.createTestingModule({
-      controllers: [
-        VersionController
+      components: [
+        CryptoService
       ]
     }).compile()
-      .then((compiledModule) => module = compiledModule);
+      .then(compiledModule => module = compiledModule);
   });
 
-  let controller: VersionController;
+  let service: CryptoService;
   beforeEach(() => {
-    controller = module.get(VersionController);
+    service = module.get(CryptoService);
   });
 
   it('should exist', () => {
-    expect(controller).to.exist;
+    expect(service).to.exist;
   });
 });

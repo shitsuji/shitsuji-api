@@ -22,4 +22,18 @@ export class RepositoryDto {
   })
   @IsString()
   url: string;
+
+  @ApiModelProperty({
+    required: true,
+    type: String
+  })
+  @IsString()
+  name: string;
+
+  @ApiModelProperty({
+    required: true,
+    type: String
+  })
+  @IsString()
+  publicKey: string;
 }

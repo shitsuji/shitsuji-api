@@ -4,33 +4,18 @@ import { CloneOptions } from 'nodegit';
 import * as path from 'path';
 import { CONFIG, GIT } from '../../constants';
 import { ShitsujiConfig } from '../../models/config.model';
+import { Keypair } from '../../models/keypair.model';
 
 @Component()
 export class RepositoryService {
-  private readonly cloneOptions: CloneOptions;
+  constructor(@Inject(GIT) private git: typeof nodeGit, @Inject(CONFIG) private config: ShitsujiConfig) {}
 
-  constructor(@Inject(GIT) private git: typeof nodeGit, @Inject(CONFIG) private config: ShitsujiConfig) {
-    if (!config.certPath) {
-      return;
-    }
-
-    this.cloneOptions = {
-      fetchOpts: {
-        callbacks: {
-          certificateCheck: () => true,
-          credentials: (url, userName) => this.git.Cred.sshKeyNew(
-            userName,
-            path.join(this.config.certPath, 'id_rsa.pub'),
-            path.join(this.config.certPath, 'id_rsa'),
-            config.certPassword
-          )
-        }
-      }
-    };
-  }
-
-  async cloneRepository(url: string, repositoryName: string) {
-    const repository = await this.git.Clone.clone(url, this.getRepositoryPath(repositoryName), this.cloneOptions);
+  async cloneRepository(url: string, repositoryName: string, keypair: Keypair) {
+    const repository = await this.git.Clone.clone(
+      url,
+      this.getRepositoryPath(repositoryName),
+      this.getCloneOptions(keypair)
+    );
 
     return repository;
   }
@@ -41,8 +26,6 @@ export class RepositoryService {
     const entry = await commit.getEntry('shitsuji.json');
     const blob = await entry.getBlob();
     const source = JSON.parse(String(blob));
-
-    console.log(source);
 
     return source;
   }
@@ -60,5 +43,21 @@ export class RepositoryService {
 
   private getRepositoryPath(repositoryName: string) {
     return path.join(this.config.storagePath, repositoryName);
+  }
+
+  private getCloneOptions(keypair: Keypair): CloneOptions {
+    return {
+      fetchOpts: {
+        callbacks: {
+          certificateCheck: () => true,
+          credentials: (url, userName) => this.git.Cred.sshKeyNew(
+            userName,
+            keypair.publicKey,
+            keypair.privateKey,
+            ''
+          )
+        }
+      }
+    };
   }
 }

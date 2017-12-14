@@ -26,7 +26,8 @@
     "nodegit": "^0.20.3",
     "orientjs": "^2.2.7",
     "reflect-metadata": "^0.1.10",
-    "rxjs": "^5.5.4"
+    "rxjs": "^5.5.4",
+    "ursa": "^0.9.4"
   },
   "devDependencies": {
     "@types/chai": "^4.0.8",

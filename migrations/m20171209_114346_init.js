@@ -4,8 +4,11 @@ async function createSchema(db) {
   let promises = [];
 
   promises.push(createClass(db, 'Repository', null, [
+    { name: 'createdAt', type: 'Date' },   
     { name: 'url', type: 'String' },
-    { name: 'createdAt', type: 'Date' }    
+    { name: 'name', type: 'String' },
+    { name: 'privateKey', type: 'String' },
+    { name: 'publicKey', type: 'String' }
   ]));
 
   promises.push(createClass(db, 'Commit', null, [
