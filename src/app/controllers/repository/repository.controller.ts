@@ -30,10 +30,15 @@ export class RepositoryController {
   async create(@Body() repositoryDto: RepositoryDto) {
     const { privateKey, publicKey } = await this.cryptoService.generateKeypair();
     const encrypted = this.cryptoService.encrypt(privateKey);
-    const decrypted = this.cryptoService.decrypt(encrypted);
 
-    return {
-      publicKey
-    };
+    const Repository = await this.databaseService.db.class.get('Repository');
+    const repository = await Repository.create({
+      ...repositoryDto,
+      publicKey,
+      privateKey: encrypted
+    } as any);
+
+    delete (repository as any).privateKey;
+    return repository;
   }
 }
