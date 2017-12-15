@@ -27,8 +27,8 @@ export class RepositoryController {
   }
 
   @Post('/')
-  create(@Body() repositoryDto: RepositoryDto) {
-    const { privateKey, publicKey } = this.cryptoService.generateKeypair();
+  async create(@Body() repositoryDto: RepositoryDto) {
+    const { privateKey, publicKey } = await this.cryptoService.generateKeypair();
     const encrypted = this.cryptoService.encrypt(privateKey);
     const decrypted = this.cryptoService.decrypt(encrypted);
 

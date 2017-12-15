@@ -8,7 +8,8 @@ import {
   Utf8AsciiBinaryEncoding
 } from 'crypto';
 import * as fs from 'fs';
-import * as ursa from 'ursa';
+import { pki, ssh } from 'node-forge';
+import * as util from 'util';
 import { CONFIG } from '../../constants';
 import { ShitsujiConfig } from '../../models/config.model';
 import { Keypair } from '../../models/keypair.model';
@@ -20,11 +21,19 @@ export class CryptoService {
 
   constructor(@Inject(CONFIG) private config: ShitsujiConfig) {}
 
-  generateKeypair(): Keypair {
-    const keypair = ursa.generatePrivateKey(4096);
-    const privateKey = keypair.toPrivatePem('utf8');
-    const publicKey = keypair.toPublicSsh('utf8');
+  async generateKeypair(): Promise<Keypair> {
+    const asyncGen = util.promisify(pki.rsa.generateKeyPair);
+    console.log(new Date());
+    const keypair = await asyncGen({
+      bits: 4096,
+      workers: 4
+    });
+    console.log(new Date());
 
+    const privateKey = pki.privateKeyToPem(keypair.privateKey);
+    const publicKey = ssh.publicKeyToOpenSSH(keypair.publicKey);
+
+    console.log(new Date());
     return {
       privateKey,
       publicKey
