@@ -8,8 +8,8 @@ import {
   Utf8AsciiBinaryEncoding
 } from 'crypto';
 import * as fs from 'fs';
+import * as jsjws from 'jsjws';
 import { pki, ssh } from 'node-forge';
-import * as util from 'util';
 import { CONFIG } from '../../constants';
 import { ShitsujiConfig } from '../../models/config.model';
 import { Keypair } from '../../models/keypair.model';
@@ -22,18 +22,10 @@ export class CryptoService {
   constructor(@Inject(CONFIG) private config: ShitsujiConfig) {}
 
   async generateKeypair(): Promise<Keypair> {
-    const asyncGen = util.promisify(pki.rsa.generateKeyPair);
-    console.log(new Date());
-    const keypair = await asyncGen({
-      bits: 4096,
-      workers: 4
-    });
-    console.log(new Date());
+    const keypair = jsjws.generatePrivateKey(4096, 65537);
+    const privateKey = keypair.toPrivatePem();
+    const publicKey = (ssh as any).publicKeyToOpenSSH(pki.publicKeyFromPem(keypair.toPublicPem()));
 
-    const privateKey = pki.privateKeyToPem(keypair.privateKey);
-    const publicKey = ssh.publicKeyToOpenSSH(keypair.publicKey);
-
-    console.log(new Date());
     return {
       privateKey,
       publicKey
