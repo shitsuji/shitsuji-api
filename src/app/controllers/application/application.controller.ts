@@ -6,9 +6,7 @@ import { RepositoryService } from '../../services/repository/repository.service'
 
 @Controller('/applications')
 export class ApplicationController {
-  constructor(private databaseService: DatabaseService, private repositoryService: RepositoryService) {
-    this.test();
-  }
+  constructor(private databaseService: DatabaseService) {}
 
   @Get('/')
   async getAll(@Query('search') search: string) {
@@ -73,13 +71,5 @@ export class ApplicationController {
       .commit()
       .return('$version')
       .one();
-  }
-
-  private async test() {
-    // await this.repositoryService.cloneRepository('git@github.com:SimpleHumbleButler/Confidential.git', 'Confidential');
-    // const result = await this.repositoryService.readVersion('Confidential', '8e7500e83769c4542f3e0f185c341b356530085c');
-
-    // await this.repositoryService.cloneRepository('git@github.com:Rafal2228/decks.git', 'decks');
-    // console.log(result);
   }
 }
