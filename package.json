@@ -11,6 +11,7 @@
     "serve": "nodemon -e ts -L --watch src --exec \"npm run build && npm run start\" ",
     "debug": "nodemon -e ts -L --watch src --exec \"npm run build && npm run start\" ",
     "db:create": "orientjs db create shitsuji graph plocal",
+    "db:drop": "orientjs db drop shitsuji",
     "migrate:up": "orientjs migrate up"
   },
   "dependencies": {
