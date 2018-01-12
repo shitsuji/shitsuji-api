@@ -7,9 +7,7 @@ import { RepositoryService } from '../../services/repository/repository.service'
 @Controller('repositories')
 export class RepositoryController {
   constructor(private repositoryService: RepositoryService, private databaseService: DatabaseService,
-    private cryptoService: CryptoService) {
-      this.create(null);
-    }
+    private cryptoService: CryptoService) {}
 
   @Get('/')
   async getAll(@Query('search') search: string) {
@@ -91,7 +89,6 @@ export class RepositoryController {
     const privateKey = this.cryptoService.decrypt((repository as any).privateKey);
     const { publicKey, url, name } = repository as any;
 
-    console.log(privateKey, publicKey);
     const repo = await this.repositoryService.cloneRepository(url, name, {
       publicKey, privateKey
     });

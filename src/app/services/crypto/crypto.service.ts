@@ -24,7 +24,7 @@ export class CryptoService {
   async generateKeypair(): Promise<Keypair> {
     const keypair = jsjws.generatePrivateKey(4096, 65537);
     const privateKey = keypair.toPrivatePem();
-    const publicKey = (ssh as any).publicKeyToOpenSSH(pki.publicKeyFromPem(keypair.toPublicPem()));
+    const publicKey = ssh.publicKeyToOpenSSH(pki.publicKeyFromPem(keypair.toPublicPem()));
 
     return {
       privateKey,
