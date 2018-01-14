@@ -26,6 +26,11 @@ export class RepositoryController {
     return repositories.map((repo) => this.repositoryToDto(repo));
   }
 
+  @Get('/:repositoryId')
+  async getById(@Param('repositoryId') repositoryId: string) {
+    return this.databaseService.db.record.get(`#${repositoryId}`);
+  }
+
   @Post('/')
   async create(@Body() repositoryDto: RepositoryDto) {
     const { privateKey, publicKey } = await this.cryptoService.generateKeypair();
@@ -43,9 +48,12 @@ export class RepositoryController {
 
   @Patch('/:repositoryId')
   async updateById(@Param('repositoryId') repositoryId: string, @Body() body: RepositoryDto) {
+    const { name, url } = body;
+    const data = { name, url };
+
     const repository = await this.databaseService.db
       .update(`#${repositoryId}`)
-      .set(body as any)
+      .set(data)
       .return('AFTER')
       .one();
 

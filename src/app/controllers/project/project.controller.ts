@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import * as Bluebird from 'bluebird';
 import { Statement } from 'orientjs';
 import { ApplicationDto } from '../../models/application.dto';
@@ -37,6 +37,18 @@ export class ProjectController {
     } as any);
 
     return project;
+  }
+
+  @Patch('/:projectId')
+  async updateById(@Param('projectId') projectId: string, @Body() body: ProjectDto) {
+    const { name } = body;
+    const data = { name };
+
+    return this.databaseService.db
+      .update(`#${projectId}`)
+      .set(data)
+      .return('AFTER')
+      .one();
   }
 
   @Get('/:projectId/applications')
