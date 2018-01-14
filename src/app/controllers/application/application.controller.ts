@@ -37,10 +37,13 @@ export class ApplicationController {
   }
 
   @Patch('/:applicationId')
-  async updateById(@Param('applicationId') applicationId: string, @Body() body: {}) {
+  async updateById(@Param('applicationId') applicationId: string, @Body() body: ApplicationDto) {
+    const { key, name } = body;
+    const data = { key, name };
+
     return this.databaseService.db
       .update(`#${applicationId}`)
-      .set(body as any)
+      .set(data)
       .return('AFTER')
       .one();
   }
