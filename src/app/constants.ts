@@ -14,3 +14,5 @@ export const SALT_ROUNDS_TOKEN = 'SALT_ROUNDS_TOKEN';
 export const AUTH_TOKEN_EXPIRATION = 60 * 60;
 export const AUTH_SECRET = 'AUTH_SECRET';
 export const JSONWEBTOKEN = 'jsonwebtoken';
+export const PASSPORT = 'passport';
+export const PASSPORT_JWT = 'passport-jwt';

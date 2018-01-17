@@ -21,7 +21,7 @@ export class UserController {
 
     const users = await usersStatement.all();
 
-    return users.map(this.removePassword);
+    return users.map(this.authService.removePassword);
   }
 
   @Get('/:userId')
@@ -32,7 +32,7 @@ export class UserController {
       throw user;
     }
 
-    return this.removePassword(user);
+    return this.authService.removePassword(user);
   }
 
   @Post('/')
@@ -47,7 +47,7 @@ export class UserController {
 
     const user = await User.create(data as any);
 
-    return this.removePassword(user);
+    return this.authService.removePassword(user);
   }
 
   @Patch('/:userId')
@@ -64,11 +64,6 @@ export class UserController {
       .return('AFTER')
       .one();
 
-    return this.removePassword(user);
-  }
-
-  private removePassword(user): UserDto {
-    const { password, ...rest } = user;
-    return { ...rest };
+    return this.authService.removePassword(user);
   }
 }
