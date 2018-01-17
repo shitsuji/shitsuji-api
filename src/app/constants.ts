@@ -7,3 +7,10 @@ export const CONFIG_DEFAULTS: ShitsujiConfig = {
   storagePath: './storage',
   secret: 'there-should-be-stronger-secret...'
 };
+
+export const BCRYPT = 'bcrypt';
+export const SALT_ROUNDS = 10;
+export const SALT_ROUNDS_TOKEN = 'SALT_ROUNDS_TOKEN';
+export const AUTH_TOKEN_EXPIRATION = 60 * 60;
+export const AUTH_SECRET = 'AUTH_SECRET';
+export const JSONWEBTOKEN = 'jsonwebtoken';
