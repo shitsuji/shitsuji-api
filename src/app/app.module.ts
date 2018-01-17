@@ -57,13 +57,14 @@ export class ApplicationModule {
 
   public configure(consumer: MiddlewaresConsumer) {
     consumer
-    .apply(this.passport.authenticate('jwt', { session: false }))
-    .forRoutes(
-      ProjectController,
-      ApplicationController,
-      VersionController,
-      RepositoryController,
-      UserController
-    );
+      .apply(this.passport.authenticate('jwt', { session: false }))
+      .forRoutes(
+        ProjectController,
+        ApplicationController,
+        VersionController,
+        RepositoryController,
+        UserController,
+        { path: 'auth/token', method: RequestMethod.POST }
+      );
   }
 }

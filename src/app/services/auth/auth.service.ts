@@ -1,6 +1,7 @@
 import { Component, Inject } from '@nestjs/common';
 import * as _bcrypt from 'bcrypt';
 import * as _jsonwebtoken from 'jsonwebtoken';
+import { RID } from 'orientjs';
 import { AUTH_SECRET, AUTH_TOKEN_EXPIRATION, BCRYPT, JSONWEBTOKEN, SALT_ROUNDS_TOKEN } from '../../constants';
 import { TokenPayload } from '../../models/token.model';
 import { UserDto } from '../../models/user.dto';
@@ -21,8 +22,8 @@ export class AuthService {
     return this.bcrypt.compare(password, hash);
   }
 
-  async createToken(userId: string): Promise<string> {
-    const payload: TokenPayload = { userId };
+  async createToken(userId: RID): Promise<string> {
+    const payload: TokenPayload = { userId: userId.toString().substr(1, userId.length) };
     const token = this.jsonwebtoken.sign(payload, this.secret, { expiresIn: this.expiresIn });
 
     return token;

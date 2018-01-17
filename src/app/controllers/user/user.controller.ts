@@ -26,7 +26,7 @@ export class UserController {
 
   @Get('/:userId')
   async getById(@Param('userId') userId: string) {
-    const user = this.databaseService.db.record.get(`#${userId}`);
+    const user = await this.databaseService.db.record.get(`#${userId}`);
 
     if (!user) {
       throw user;

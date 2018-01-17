@@ -1,4 +1,4 @@
-import { Body, Controller, HttpException, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, HttpException, HttpStatus, Post, Req } from '@nestjs/common';
 import { UserDto } from '../../models/user.dto';
 import { AuthService } from '../../services/auth/auth.service';
 import { DatabaseService } from '../../services/database/database.service';
@@ -25,6 +25,24 @@ export class AuthController {
 
     if (!passwordMatch) {
       throw new HttpException('Inavlid user or password', HttpStatus.BAD_REQUEST);
+    }
+
+    const token = await this.authService.createToken(user['@rid']);
+    const response = {
+      user: this.authService.removePassword(user),
+      token
+    };
+
+    return response;
+  }
+
+  @Post('/token')
+  async token(@Req() req: Express.Request) {
+    const userId = req.user.id;
+    const user = await this.databaseService.db.record.get(`#${userId}`);
+
+    if (!user) {
+      throw new HttpException('Token not valid', HttpStatus.BAD_REQUEST);
     }
 
     const token = await this.authService.createToken(user['@rid']);
