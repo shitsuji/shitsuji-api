@@ -11,7 +11,20 @@ services:
     volumes:
       - db_config:/orientdb/config
       - db_data:/orientdb/databases
-      - db_backup:/orientdb/backup 
+      - db_backup:/orientdb/backup
+  proxy:
+    build:
+      context: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    secrets:
+      - proxy_cert
+      - proxy_dhparam
+      - proxy_key
+    environment:
+      PROXY_HOST: ${HOST_IP:-localhost}
+      PROXY_PORT: 5000
   # app:
   #   build: .
   #   depends_on:
@@ -25,3 +38,11 @@ volumes:
   db_config:
   db_data:
   db_backup:
+
+secrets:
+  proxy_cert:
+    file: ./nginx/secrets/cert.crt
+  proxy_dhparam:
+    file: ./nginx/secrets/dhparam.pem
+  proxy_key:
+    file: ./nginx/secrets/key.pem
