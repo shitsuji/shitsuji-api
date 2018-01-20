@@ -6,4 +6,4 @@ WORKDIR /usr/src
 COPY proxy.conf ./
 COPY start.sh ./
 
-ENTRYPOINT ./start.sh
+ENTRYPOINT ["/bin/sh", "start.sh"]
