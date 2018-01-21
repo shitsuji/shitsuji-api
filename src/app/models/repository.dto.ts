@@ -36,4 +36,11 @@ export class RepositoryDto {
   })
   @IsString()
   publicKey: string;
+
+  @ApiModelProperty({
+    required: true,
+    type: String
+  })
+  @IsString()
+  key: string;
 }

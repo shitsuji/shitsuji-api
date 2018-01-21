@@ -1,8 +1,9 @@
 const { createClass, createIndex } = require('./helpers');
+const bcrypt = require('bcrypt');
 
 const DEFAULT_USER = {
   login: 'admin',
-  password: 'admin'
+  password: bcrypt.hashSync('admin', 10)
 };
 
 async function createUser(db) {

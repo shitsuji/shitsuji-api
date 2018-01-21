@@ -30,10 +30,12 @@ export class ApplicationController {
 
   @Post('/')
   async create(@Body() applicationDto: ApplicationDto) {
-    const Application = await this.databaseService.db.class.get('Application');
-    return Application.create({
-      ...applicationDto
-    } as any);
+    return this.databaseService.db.insert()
+      .into('Application')
+      .set({
+        ...applicationDto
+      })
+      .one();
   }
 
   @Patch('/:applicationId')

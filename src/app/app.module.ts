@@ -7,6 +7,7 @@ import { ProjectController } from './controllers/project/project.controller';
 import { RepositoryController } from './controllers/repository/repository.controller';
 import { UserController } from './controllers/user/user.controller';
 import { VersionController } from './controllers/version/version.controller';
+import { WebhookController } from './controllers/webhook/webhook.controller';
 import { BcryptProvider, SaltRoundsProvider } from './providers/bcrypt.provider';
 import { configProvider } from './providers/config.provider';
 import { gitProvider } from './providers/git.provider';
@@ -30,7 +31,8 @@ import { RepositoryService } from './services/repository/repository.service';
     VersionController,
     RepositoryController,
     UserController,
-    AuthController
+    AuthController,
+    WebhookController
   ],
   components: [
     configProvider,

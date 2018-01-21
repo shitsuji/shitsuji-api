@@ -31,12 +31,12 @@ export class ProjectController {
 
   @Post('/')
   async create(@Body() projectDto: ProjectDto) {
-    const Project = await this.databaseService.db.class.get('Project');
-    const project = await Project.create({
-      name: projectDto.name
-    } as any);
-
-    return project;
+    return this.databaseService.db.insert()
+      .into('Project')
+      .set({
+        name: projectDto.name
+      })
+      .one();
   }
 
   @Patch('/:projectId')

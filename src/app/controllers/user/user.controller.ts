@@ -37,15 +37,16 @@ export class UserController {
 
   @Post('/')
   async create(@Body() userDto: UserDto) {
-    const User = await this.databaseService.db.class.get('User');
-
     const password = await this.authService.hash(userDto.password);
     const data = {
       login: userDto.login,
       password
     };
 
-    const user = await User.create(data as any);
+    const user = await this.databaseService.db.insert()
+      .into('Repository')
+      .set(data)
+      .one();
 
     return this.authService.removePassword(user);
   }
