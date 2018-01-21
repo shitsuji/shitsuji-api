@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Param, Post } from '@nestjs/common';
 import { CryptoService } from '../../services/crypto/crypto.service';
 import { DatabaseService } from '../../services/database/database.service';
 import { RepositoryService } from '../../services/repository/repository.service';
@@ -8,8 +8,8 @@ export class WebhookController {
   constructor(private repositoryService: RepositoryService, private databaseService: DatabaseService,
     private cryptoService: CryptoService) {}
 
-  @Post('/:repositoryId/webhook')
-  async webhook(@Param('repositoryId') repositoryId: string, @Body() body) {
+  @Post('/:key')
+  async webhook(@Param('key') key: string, @Body() body) {
     let hash;
 
     if (body.action && body.pull_request) {
@@ -21,12 +21,10 @@ export class WebhookController {
     }
 
     const repository = await this.databaseService.db
-    .select()
-    .where({
-      '@rid': repositoryId
-    })
-    .from('Repository')
-    .one();
+      .select()
+      .where({ key })
+      .from('Repository')
+      .one();
 
     const privateKey = this.cryptoService.decrypt((repository as any).privateKey);
     const { publicKey, url, name } = repository as any;
