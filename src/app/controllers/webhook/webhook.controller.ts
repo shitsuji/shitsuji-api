@@ -1,22 +1,24 @@
 import { Body, Controller, Param, Post } from '@nestjs/common';
-import { CryptoService } from '../../services/crypto/crypto.service';
+import { Record } from 'orientjs';
+import { WebhookAction } from '../../constants';
+import { RepositoryModel } from '../../models/repository.model';
 import { DatabaseService } from '../../services/database/database.service';
-import { RepositoryService } from '../../services/repository/repository.service';
+import { WebhookService } from '../../services/webhook/webhook.service';
+
+interface WebhookCommand {
+  type: WebhookAction;
+  payload: any;
+}
 
 @Controller('webhook')
 export class WebhookController {
-  constructor(private repositoryService: RepositoryService, private databaseService: DatabaseService,
-    private cryptoService: CryptoService) {}
+  constructor(private databaseService: DatabaseService, private webhookService: WebhookService) {}
 
   @Post('/:key')
   async webhook(@Param('key') key: string, @Body() body) {
-    let hash;
+    const command = this.handleGithub(body);
 
-    if (body.action && body.pull_request) {
-      hash = this.handleGithub(body);
-    }
-
-    if (!hash) {
+    if (!command) {
       return {};
     }
 
@@ -24,50 +26,47 @@ export class WebhookController {
       .select()
       .where({ key })
       .from('Repository')
-      .one();
+      .one() as Record & RepositoryModel;
 
-    const privateKey = this.cryptoService.decrypt((repository as any).privateKey);
-    const { publicKey, url, name } = repository as any;
-
-    const conf = await this.repositoryService.readVersion(name, hash);
-    console.log(conf);
-    // To-Do: logic to updated version in orient
-
-    return {};
-  }
-
-  @Post('/:repositoryId/initialize')
-  async initialize(@Param('repositoryId') repositoryId: string) {
-    const repository = await this.databaseService.db
-    .select()
-    .where({
-      '@rid': repositoryId
-    })
-    .from('Repository')
-    .one();
-
-    const privateKey = this.cryptoService.decrypt((repository as any).privateKey);
-    const { publicKey, url, name } = repository as any;
-
-    const repo = await this.repositoryService.cloneRepository(url, name, {
-      publicKey, privateKey
-    });
-
-    const conf = await this.repositoryService.readHead(name);
-
-    console.log(conf);
-    // To-Do: logic to updated version in orient
-
-    return {};
-  }
-
-  private handleGithub(payload): string {
-    const { action, pull_request } = payload;
-
-    if (action !== 'merged') {
-      return null;
+    switch (command.type) {
+      case WebhookAction.Push: {
+        return this.webhookService.push(repository, command.payload);
+      }
+      case WebhookAction.Initialize: {
+        return this.webhookService.initialize(repository);
+      }
     }
 
-    return pull_request.head.sha;
+    return {};
+  }
+
+  private handleGithub(payload): WebhookCommand {
+    const { ref, after, hook } = payload;
+
+    // If we have ref and after we assume it's an push event
+    // for more details see: https://developer.github.com/v3/activity/events/types/#pushevent
+    if (ref && after) {
+      const refs = (ref as string).split('/');
+      const branch = refs[refs.length - 1];
+
+      return {
+        type: WebhookAction.Push,
+        payload: {
+          branch,
+          hash: after
+        }
+      };
+    }
+
+    // If we have hook property, we assume it's a ping from Github
+    // and initialize repository as it was freshly added
+    if (hook) {
+      return {
+        type: WebhookAction.Initialize,
+        payload: {}
+      };
+    }
+
+    return null;
   }
 }

@@ -1,12 +1,13 @@
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApplicationDto } from '../../models/application.dto';
 import { VersionDto } from '../../models/version.dto';
+import { ApplicationService } from '../../services/application/application.service';
 import { DatabaseService } from '../../services/database/database.service';
 import { RepositoryService } from '../../services/repository/repository.service';
 
 @Controller('/applications')
 export class ApplicationController {
-  constructor(private databaseService: DatabaseService) {}
+  constructor(private databaseService: DatabaseService, private applicationService: ApplicationService) {}
 
   @Get('/')
   async getAll(@Query('search') search: string) {
@@ -30,12 +31,7 @@ export class ApplicationController {
 
   @Post('/')
   async create(@Body() applicationDto: ApplicationDto) {
-    return this.databaseService.db.insert()
-      .into('Application')
-      .set({
-        ...applicationDto
-      })
-      .one();
+    this.applicationService.createApplication(applicationDto);
   }
 
   @Patch('/:applicationId')
@@ -63,18 +59,6 @@ export class ApplicationController {
 
   @Post('/:applicationId/versions')
   async addVersion(@Body() versionDto: VersionDto, @Param('applicationId') applicationId: string) {
-    return this.databaseService.db
-      .let('version', this.databaseService.db
-        .create('VERTEX', 'Version')
-        .set({ ...versionDto } as any)
-      )
-      .let('has', this.databaseService.db
-        .create('EDGE', 'Has')
-        .from(`#${applicationId}`)
-        .to('$version')
-      )
-      .commit()
-      .return('$version')
-      .one();
+    return this.applicationService.addApplicationVersion(versionDto, applicationId);
   }
 }

@@ -18,11 +18,13 @@ import {
   PassportJwtProvider,
   PassportProvider
 } from './providers/passport.provider';
+import { ApplicationService } from './services/application/application.service';
 import { AuthService } from './services/auth/auth.service';
 import { CryptoService } from './services/crypto/crypto.service';
 import { DatabaseService } from './services/database/database.service';
 import { JwtStrategyService } from './services/jwt-strategy/jwt-strategy.service';
 import { RepositoryService } from './services/repository/repository.service';
+import { WebhookService } from './services/webhook/webhook.service';
 
 @Module({
   controllers: [
@@ -52,6 +54,9 @@ import { RepositoryService } from './services/repository/repository.service';
     CryptoService,
     AuthService,
     JwtStrategyService,
+
+    ApplicationService,
+    WebhookService,
   ]
 })
 export class ApplicationModule {

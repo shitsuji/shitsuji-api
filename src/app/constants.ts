@@ -16,3 +16,10 @@ export const AUTH_SECRET = 'AUTH_SECRET';
 export const JSONWEBTOKEN = 'jsonwebtoken';
 export const PASSPORT = 'passport';
 export const PASSPORT_JWT = 'passport-jwt';
+export const HISTORY_LIMIT = 500;
+export const CONFIG_FILE_LOCATION = 'shitsuji.json';
+
+export enum WebhookAction {
+  Initialize,
+  Push
+}

@@ -84,6 +84,17 @@ export class RepositoryController {
     return this.repositoryToDto(repository);
   }
 
+  @Post('/:repositoryId/initialize')
+  async initialize(@Param('repositoryId') repositoryId: string) {
+    const repository = await this.databaseService.db
+    .select()
+    .where({
+      '@rid': repositoryId
+    })
+    .from('Repository')
+    .one();
+  }
+
   private repositoryToDto(repository) {
     delete (repository as any).privateKey;
     return repository;
