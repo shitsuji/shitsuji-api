@@ -1,6 +1,5 @@
 import { ApiModelProperty, ApiModelPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { RepositoryDto } from './repository.dto';
 
 export class ApplicationDto {
   @ApiModelProperty({
@@ -37,18 +36,4 @@ export class ApplicationDto {
   @IsOptional()
   @IsBoolean()
   isGenerated: boolean;
-
-  @ApiModelPropertyOptional({
-    type: Boolean
-  })
-  @IsOptional()
-  @IsBoolean()
-  isLegacy: boolean;
-
-  @ApiModelPropertyOptional({
-    type: RepositoryDto
-  })
-  @IsOptional()
-  @ValidateNested()
-  repository: RepositoryDto;
 }
