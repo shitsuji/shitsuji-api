@@ -15,7 +15,7 @@ export class UserController {
 
     if (search) {
       usersStatement = usersStatement.containsText({
-        name: search
+        login: search
       });
     }
 
@@ -44,7 +44,7 @@ export class UserController {
     };
 
     const user = await this.databaseService.db.insert()
-      .into('Repository')
+      .into('User')
       .set(data)
       .one();
 
