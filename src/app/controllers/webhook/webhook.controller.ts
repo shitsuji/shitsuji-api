@@ -1,14 +1,9 @@
-import { Body, Controller, Param, Post } from '@nestjs/common';
+import { Body, Controller, HttpException, HttpStatus, Param, Post } from '@nestjs/common';
 import { Record } from 'orientjs';
-import { WebhookAction } from '../../constants';
 import { RepositoryModel } from '../../models/repository.model';
+import { WebhookAction, WebhookCommand } from '../../models/webhook.model';
 import { DatabaseService } from '../../services/database/database.service';
 import { WebhookService } from '../../services/webhook/webhook.service';
-
-interface WebhookCommand {
-  type: WebhookAction;
-  payload: any;
-}
 
 @Controller('webhook')
 export class WebhookController {
@@ -28,12 +23,18 @@ export class WebhookController {
       .from('Repository')
       .one() as Record & RepositoryModel;
 
+    if (!repository) {
+      throw new HttpException('Repository not found', HttpStatus.BAD_GATEWAY);
+    }
+
     switch (command.type) {
       case WebhookAction.Push: {
-        return this.webhookService.push(repository, command.payload);
+        await this.webhookService.push(repository, command.payload);
+        return {};
       }
       case WebhookAction.Initialize: {
-        return this.webhookService.initialize(repository);
+        await this.webhookService.initialize(repository);
+        return {};
       }
     }
 

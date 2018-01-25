@@ -12,22 +12,22 @@ export class VersionDto {
 
   @ApiModelProperty({
     required: true,
-    type: String
-  })
-  @IsString()
-  number: string;
-
-  @ApiModelProperty({
-    required: true,
     type: Date
   })
   @IsDate()
   createdAt: Date;
+
+  @ApiModelProperty({
+    required: true,
+    type: String
+  })
+  @IsString()
+  number: string;
 
   @ApiModelPropertyOptional({
     type: CommitDto
   })
   @IsOptional()
   @ValidateNested()
-  commit: CommitDto;
+  commit?: CommitDto;
 }

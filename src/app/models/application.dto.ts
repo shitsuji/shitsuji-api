@@ -37,3 +37,9 @@ export class ApplicationDto {
   @IsBoolean()
   isGenerated: boolean;
 }
+
+export interface ApplicationCreateData {
+  name: string;
+  key: string;
+  isGenerated: boolean;
+}

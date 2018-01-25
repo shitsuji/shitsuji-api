@@ -1,6 +1,8 @@
 import { Component } from '@nestjs/common';
 import { Record } from 'orientjs';
 import { RepositoryModel } from '../../models/repository.model';
+import { VersionCreateDto } from '../../models/version-create.dto';
+import { ApplicationConfig, ConfigPackage } from '../../models/webhook.model';
 import { CryptoService } from '../../services/crypto/crypto.service';
 import { DatabaseService } from '../../services/database/database.service';
 import { RepositoryService } from '../../services/repository/repository.service';
@@ -19,8 +21,8 @@ export class WebhookService {
       publicKey, privateKey
     });
 
-    const configs = await this.repositoryService.walkHistoryFromHead(repo, branch);
-    configs.forEach(this.handleConfig);
+    const packages = await this.repositoryService.walkHistoryFromHead(repo, branch);
+    return Promise.all(packages.map((p) => this.handleConfigPackage(p)));
   }
 
   async push(repository: Record & RepositoryModel, { branch, hash }: { branch: string, hash: string }) {
@@ -30,29 +32,45 @@ export class WebhookService {
 
     const privateKey = this.cryptoService.decrypt(repository.privateKey);
     const { publicKey, url, name } = repository;
-    const conf = await this.repositoryService.readVersion(name, hash);
+    const pack = await this.repositoryService.readVersion(name, hash);
+
+    return this.handleConfigPackage(pack);
   }
 
-  private async handleConfig(config) {
-    const { applications: appConfigs } = config;
-
-    if (!appConfigs || !appConfigs.length) {
+  private async handleConfigPackage({ config, commit }: ConfigPackage) {
+    if (!config.applications || !config.applications.length) {
       return;
     }
 
-    const applications = await this.applicationService.getOrCreateApplications(
-      appConfigs.map(({ version, dependencies, ...rest }) => rest)
-    );
+    return Promise.all(config.applications.map(async (app) => {
+      const application = await this.applicationService
+        .getOrCreateApplication(app.key);
 
-    const promises = appConfigs.map(async (app) => {
-      const { dependencies: depsConfigs } = app;
+      const versionDto: VersionCreateDto = {
+        number: app.version,
+        commit
+      };
+      const version = await this.applicationService
+        .getOrCreateApplicationVersion(application, versionDto);
 
-      if (depsConfigs && depsConfigs.length) {
-        const dependencies = await this.applicationService.getOrCreateApplications(
-          depsConfigs.map(({ version, ...rest }) => rest)
-        );
-
+      if (!app.dependencies || !app.dependencies.length) {
+        return;
       }
-    });
+
+      return Promise.all(app.dependencies.map(async (dep) => {
+        const dependency = await this.applicationService
+          .getOrCreateApplication(dep.key);
+
+        const dependencyVersionDto: VersionCreateDto = {
+          number: app.version,
+          commit
+        };
+
+        const dependencyVersion = await this.applicationService
+          .getOrCreateApplicationVersion(dependency, dependencyVersionDto);
+
+        return this.applicationService.connectVersions(version, dependencyVersion);
+      }));
+    }));
   }
 }

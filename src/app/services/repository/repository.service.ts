@@ -1,12 +1,14 @@
 import { Component, Inject } from '@nestjs/common';
-import * as nodeGit from 'nodegit';
 import { Checkout, CloneOptions, Revwalk } from 'nodegit';
+import * as nodeGit from 'nodegit';
 import { Commit } from 'nodegit/commit';
 import { Repository } from 'nodegit/repository';
 import * as path from 'path';
 import { CONFIG, CONFIG_FILE_LOCATION, GIT, HISTORY_LIMIT } from '../../constants';
+import { CommitCreateDto } from '../../models/commit-create.dto';
 import { ShitsujiConfig } from '../../models/config.model';
 import { Keypair } from '../../models/keypair.model';
+import { ApplicationConfig, ConfigFile, ConfigPackage } from '../../models/webhook.model';
 
 @Component()
 export class RepositoryService {
@@ -16,7 +18,7 @@ export class RepositoryService {
     let repository;
 
     try {
-      repository = this.openRepository(repositoryName);
+      repository = await this.openRepository(repositoryName);
     } catch (e) {
       repository = await this.git.Clone.clone(
         url,
@@ -28,7 +30,7 @@ export class RepositoryService {
     return repository;
   }
 
-  async walkHistoryFromHead(repo: Repository, branch: string) {
+  async walkHistoryFromHead(repo: Repository, branch: string): Promise<ConfigPackage[]> {
     await repo.checkoutBranch(branch, {
       checkoutStrategy: Checkout.STRATEGY.FORCE
     });
@@ -41,19 +43,30 @@ export class RepositoryService {
     const firstWindow = await walker.fileHistoryWalk(CONFIG_FILE_LOCATION, HISTORY_LIMIT);
     const entries = await this.getFileHistory(repo, [], firstWindow);
 
-    return Promise.all(entries.map(({ commit }) => {
+    return Promise.all<ConfigPackage>(entries.map(async ({ commit }) => {
       commit.repo = repo;
-      return this.findSource(commit);
+      const config = await this.findSource(commit);
+      const commitDto = this.commitToCommitCreateDto(commit);
+
+      return {
+        config,
+        commit: commitDto
+      };
     }));
   }
 
-  async readVersion(repositoryName: string, hash: string) {
+  async readVersion(repositoryName: string, hash: string): Promise<ConfigPackage> {
     const commit = await this.checkoutCommit(repositoryName, hash);
+    const config = await this.findSource(commit);
+    const commitDto = this.commitToCommitCreateDto(commit);
 
-    return this.findSource(commit);
+    return {
+      config,
+      commit: commitDto
+    };
   }
 
-  private async findSource(commit: Commit) {
+  private async findSource(commit: Commit): Promise<ConfigFile> {
     const entry = await commit.getEntry(CONFIG_FILE_LOCATION);
     const blob = await entry.getBlob();
     const source = JSON.parse(String(blob));
@@ -118,5 +131,13 @@ export class RepositoryService {
 
     const nextWindow = await walker.fileHistoryWalk(CONFIG_FILE_LOCATION, HISTORY_LIMIT);
     return this.getFileHistory(repo, commits, nextWindow);
+  }
+
+  private commitToCommitCreateDto(commit: Commit): CommitCreateDto {
+    return {
+      author: commit.author().toString(),
+      hash: commit.sha(),
+      message: commit.message()
+    };
   }
 }

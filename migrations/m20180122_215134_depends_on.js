@@ -1,8 +1,8 @@
 const { createEdge, createIndex } = require('./helpers');
 
 async function createDependsOnEdge(db) {
-  createEdge(db, 'DependsOn', 'Version', 'Version');
-  createIndex(db, 'DependsOn', ['in', 'out'], 'UNIQUE');
+  await createEdge(db, 'DependsOn', 'Version', 'Version');
+  await createIndex(db, 'DependsOn', ['in', 'out'], 'UNIQUE');
 }
 
 exports.name = "depends_on";

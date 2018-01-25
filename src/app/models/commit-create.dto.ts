@@ -1,19 +1,25 @@
 import { ApiModelProperty } from '@nestjs/swagger';
 import { IsDate, IsString } from 'class-validator';
-import { CommitCreateDto } from './commit-create.dto';
 
-export class CommitDto extends CommitCreateDto {
+export class CommitCreateDto {
   @ApiModelProperty({
     required: true,
     type: String
   })
   @IsString()
-  '@rid': string;
+  author: string;
 
   @ApiModelProperty({
     required: true,
-    type: Date
+    type: String
   })
-  @IsDate()
-  createdAt: Date;
+  @IsString()
+  hash: string;
+
+  @ApiModelProperty({
+    required: true,
+    type: String
+  })
+  @IsString()
+  message: string;
 }
