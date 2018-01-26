@@ -2,7 +2,7 @@ import { Component } from '@nestjs/common';
 import { Record } from 'orientjs';
 import { RepositoryModel } from '../../models/repository.model';
 import { VersionCreateDto } from '../../models/version-create.dto';
-import { ApplicationConfig, ConfigPackage } from '../../models/webhook.model';
+import { ApplicationConfig, CommandType, ConfigPackage, WebhookCommand } from '../../models/webhook.model';
 import { CryptoService } from '../../services/crypto/crypto.service';
 import { DatabaseService } from '../../services/database/database.service';
 import { RepositoryService } from '../../services/repository/repository.service';
@@ -22,7 +22,10 @@ export class WebhookService {
     });
 
     const packages = await this.repositoryService.walkHistoryFromHead(repo, branch);
-    return Promise.all(packages.map((p) => this.handleConfigPackage(p)));
+    const commandsList = packages.map((p) => this.readCommands(p));
+    const reduced = this.mergeCommandsList(commandsList);
+
+    return this.executeCommands(reduced);
   }
 
   async push(repository: Record & RepositoryModel, { branch, hash }: { branch: string, hash: string }) {
@@ -34,43 +37,123 @@ export class WebhookService {
     const { publicKey, url, name } = repository;
     const pack = await this.repositoryService.readVersion(name, hash);
 
-    return this.handleConfigPackage(pack);
+    const commandsList = [this.readCommands(pack)];
+    const reduced = this.mergeCommandsList(commandsList);
+
+    return this.executeCommands(reduced);
   }
 
-  private async handleConfigPackage({ config, commit }: ConfigPackage) {
+  private readCommands({ config, commit }: ConfigPackage): { [key: number]: Array<{}> } {
+    const commands = {
+      [CommandType.GetOrCreateApplication]: [],
+      [CommandType.GetOrCreateApplicationVersion]: [],
+      [CommandType.ConnectVersions]: [],
+    };
+
     if (!config.applications || !config.applications.length) {
-      return;
+      return commands;
     }
 
-    return Promise.all(config.applications.map(async (app) => {
-      const application = await this.applicationService
-        .getOrCreateApplication(app.key);
+    for (const app of config.applications) {
+      commands[CommandType.GetOrCreateApplication].push({
+        key: app.key
+      });
 
-      const versionDto: VersionCreateDto = {
-        number: app.version,
-        commit
-      };
-      const version = await this.applicationService
-        .getOrCreateApplicationVersion(application, versionDto);
-
-      if (!app.dependencies || !app.dependencies.length) {
-        return;
-      }
-
-      return Promise.all(app.dependencies.map(async (dep) => {
-        const dependency = await this.applicationService
-          .getOrCreateApplication(dep.key);
-
-        const dependencyVersionDto: VersionCreateDto = {
+      commands[CommandType.GetOrCreateApplicationVersion].push({
+        versionDto: {
           number: app.version,
           commit
-        };
+        },
+        applicationKey: app.key
+      });
 
-        const dependencyVersion = await this.applicationService
-          .getOrCreateApplicationVersion(dependency, dependencyVersionDto);
+      if (!app.dependencies) {
+        continue;
+      }
 
-        return this.applicationService.connectVersions(version, dependencyVersion);
-      }));
+      for (const dep of app.dependencies) {
+        commands[CommandType.GetOrCreateApplication].push({
+          key: dep.key
+        });
+
+        commands[CommandType.GetOrCreateApplicationVersion].push({
+          versionDto: {
+            number: dep.version,
+            commit
+          },
+          applicationKey: dep.key
+        });
+
+        commands[CommandType.ConnectVersions].push({
+          key: app.key,
+          version: app.version,
+          dependencyKey: dep.key,
+          dependencyVersion: dep.version
+        });
+      }
+    }
+
+    return commands;
+  }
+
+  private mergeCommandsList(commandsList: Array<{ [key: number]: Array<{}> }>) {
+    const reduced = commandsList.reduce((result, commands) => {
+      result[CommandType.GetOrCreateApplication].push(...commands[CommandType.GetOrCreateApplication]);
+      result[CommandType.GetOrCreateApplicationVersion].push(...commands[CommandType.GetOrCreateApplicationVersion]);
+      result[CommandType.ConnectVersions].push(...commands[CommandType.ConnectVersions]);
+
+      return result;
+    }, {
+      [CommandType.GetOrCreateApplication]: [],
+      [CommandType.GetOrCreateApplicationVersion]: [],
+      [CommandType.ConnectVersions]: [],
+    });
+
+    reduced[CommandType.GetOrCreateApplication] = this
+      .uniqBy(reduced[CommandType.GetOrCreateApplication], JSON.stringify);
+
+    reduced[CommandType.GetOrCreateApplicationVersion] = this
+      .uniqBy(reduced[CommandType.GetOrCreateApplicationVersion], (params) => {
+        return JSON.stringify({
+          applicationKey: params.applicationKey,
+          version: params.versionDto.number
+        });
+      });
+
+    reduced[CommandType.ConnectVersions] = this
+      .uniqBy(reduced[CommandType.ConnectVersions], JSON.stringify);
+
+    return reduced;
+  }
+
+  private async executeCommands(commands) {
+    await Promise.all(commands[CommandType.GetOrCreateApplication]
+    .map(({ key }) => {
+      return this.applicationService.getOrCreateApplication(key);
     }));
+
+    await Promise.all(commands[CommandType.GetOrCreateApplicationVersion]
+    .map(({ versionDto, applicationKey }) => {
+      return this.applicationService.getOrCreateApplicationVersion(applicationKey, versionDto);
+    }));
+
+    await Promise.all(commands[CommandType.ConnectVersions]
+    .map(({key, version, dependencyKey, dependencyVersion}) => {
+      return this.applicationService.connectVersions(key, version, dependencyKey, dependencyVersion);
+    }));
+  }
+
+  private uniqBy(arr: Array<{}>, predicate: (...args) => string | string) {
+    const cb = typeof predicate === 'function' ? predicate : (o) => o[predicate];
+    return [...arr
+      .reduce<Map<string, {}>>((map, item) => {
+        const key = cb(item);
+        if (!map.has(key)) {
+          map.set(key, item);
+        }
+
+        return map;
+      }, new Map())
+      .values()];
   }
 }

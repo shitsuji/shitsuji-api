@@ -25,6 +25,29 @@ export class ApplicationService {
       .one();
   }
 
+  async addApplicationVersionByKey(versionDto: VersionCreateDto, applicationKey: string) {
+    return this.databaseService.db
+      .let('version', this.databaseService.db
+        .create('VERTEX', 'Version')
+        .set({ ...versionDto } as any)
+      )
+      .let('application', this.databaseService.db
+        .select()
+        .from('Application')
+        .where({
+          key: applicationKey
+        })
+      )
+      .let('has', this.databaseService.db
+        .create('EDGE', 'Has')
+        .from('$application')
+        .to('$version')
+      )
+      .commit()
+      .return('$version')
+      .one();
+  }
+
   async createApplication(applicationDto: ApplicationCreateDto) {
     return this.databaseService.db.insert()
       .into('Application')
@@ -54,41 +77,71 @@ export class ApplicationService {
     return result;
   }
 
-  async getOrCreateApplicationVersion(application: ApplicationDto, versionDto: VersionCreateDto) {
+  async getOrCreateApplicationVersion(applicationKey: string, versionDto: VersionCreateDto) {
     const result = await this.databaseService.db
-    .let('versions', this.databaseService.db
-      .select(`expand(out('Has'))`)
-      .from('Application')
-      .where({
-        '@rid': application['@rid']
-      })
-    )
-    .let('version', this.databaseService.db
-      .select('*')
-      .from('$versions')
-      .where({
-        number: versionDto.number
-      })
-    )
-    .commit()
-    .return('$version')
-    .one() as VersionDto;
+      .let('versions', this.databaseService.db
+        .select(`expand(out('Has'))`)
+        .from('Application')
+        .where({
+          key: applicationKey
+        })
+      )
+      .let('version', this.databaseService.db
+        .select()
+        .from('$versions')
+        .where({
+          number: versionDto.number
+        })
+      )
+      .commit()
+      .return('$version')
+      .one() as VersionDto;
 
     if (result) {
       return result;
     }
 
-    const rid = application['@rid'].toString();
-    const applicationId = rid.substr(1, rid.length);
-    return this.addApplicationVersion(versionDto, applicationId) as Promise<VersionDto>;
+    return this.addApplicationVersionByKey(versionDto, applicationKey) as Promise<VersionDto>;
   }
 
-  async connectVersions(version: VersionDto, dependency: VersionDto) {
+  async connectVersions(key, version, dependencyKey, dependencyVersion) {
     try {
       return await this.databaseService.db
-        .create('EDGE', 'DependsOn')
-        .from(version['@rid'])
-        .to(dependency['@rid'])
+        .let('versions', this.databaseService.db
+          .select(`expand(out('Has'))`)
+          .from('Application')
+          .where({
+            key
+          })
+        )
+        .let('version', this.databaseService.db
+          .select()
+          .from('$versions')
+          .where({
+            number: version
+          })
+        )
+        .let('depVersions', this.databaseService.db
+          .select(`expand(out('Has'))`)
+          .from('Application')
+          .where({
+            key: dependencyKey
+          })
+        )
+        .let('depVersion', this.databaseService.db
+          .select()
+          .from('$depVersions')
+          .where({
+            number: dependencyVersion
+          })
+        )
+        .let('result', this.databaseService.db
+          .create('EDGE', 'DependsOn')
+          .from('$version')
+          .to('$depVersion')
+        )
+        .commit()
+        .return('$result')
         .one();
     } catch (e) {
       return null;

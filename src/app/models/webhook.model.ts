@@ -29,3 +29,10 @@ export interface DependencyConfig {
   key: string;
   version: string;
 }
+
+export enum CommandType {
+  GetOrCreateApplication,
+  GetOrCreateApplicationVersion,
+  ConnectVersions,
+  ConnectApplicationToRepository
+}
