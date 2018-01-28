@@ -24,6 +24,7 @@ import { CryptoService } from './services/crypto/crypto.service';
 import { DatabaseService } from './services/database/database.service';
 import { JwtStrategyService } from './services/jwt-strategy/jwt-strategy.service';
 import { RepositoryService } from './services/repository/repository.service';
+import { VersionService } from './services/version/version.service';
 import { WebhookService } from './services/webhook/webhook.service';
 
 @Module({
@@ -56,6 +57,7 @@ import { WebhookService } from './services/webhook/webhook.service';
     JwtStrategyService,
 
     ApplicationService,
+    VersionService,
     WebhookService,
   ]
 })
