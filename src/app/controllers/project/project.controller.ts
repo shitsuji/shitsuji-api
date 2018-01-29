@@ -82,7 +82,15 @@ export class ProjectController {
         .from(`[${applicationsIds.map((id) => '#' + id)}]`)
         .to(`[${new Array(applicationsIds.length).fill('#' + projectId)}]`)
       )
+      .let('applications', this.databaseService.db
+        .select(`expand(in('PartOf'))`)
+        .from('Project')
+        .where({
+          '@rid': `#${projectId}`
+        })
+      )
       .commit()
+      .return('$applications')
       .all();
   }
 }
