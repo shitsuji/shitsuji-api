@@ -22,7 +22,7 @@ export class WebhookService {
     });
 
     const packages = await this.repositoryService.walkHistoryFromHead(repo, branch);
-    const commandsList = packages.map((p) => this.readCommands(p));
+    const commandsList = packages.map((p) => this.readCommands(p, repository['@rid'].toString()));
     const reduced = this.mergeCommandsList(commandsList);
 
     return this.executeCommands(reduced);
@@ -37,17 +37,18 @@ export class WebhookService {
     const { publicKey, url, name } = repository;
     const pack = await this.repositoryService.readVersion(name, hash);
 
-    const commandsList = [this.readCommands(pack)];
+    const commandsList = [this.readCommands(pack, repository['@rid'].toString())];
     const reduced = this.mergeCommandsList(commandsList);
 
     return this.executeCommands(reduced);
   }
 
-  private readCommands({ config, commit }: ConfigPackage): { [key: number]: Array<{}> } {
+  private readCommands({ config, commit }: ConfigPackage, repositoryRid: string): { [key: number]: Array<{}> } {
     const commands = {
       [CommandType.GetOrCreateApplication]: [],
       [CommandType.GetOrCreateApplicationVersion]: [],
       [CommandType.ConnectVersions]: [],
+      [CommandType.ConnectApplicationToRepository]: [],
     };
 
     if (!config.applications || !config.applications.length) {
@@ -57,6 +58,11 @@ export class WebhookService {
     for (const app of config.applications) {
       commands[CommandType.GetOrCreateApplication].push({
         key: app.key
+      });
+
+      commands[CommandType.ConnectApplicationToRepository].push({
+        key: app.key,
+        repositoryRid
       });
 
       commands[CommandType.GetOrCreateApplicationVersion].push({
@@ -101,16 +107,21 @@ export class WebhookService {
       result[CommandType.GetOrCreateApplication].push(...commands[CommandType.GetOrCreateApplication]);
       result[CommandType.GetOrCreateApplicationVersion].push(...commands[CommandType.GetOrCreateApplicationVersion]);
       result[CommandType.ConnectVersions].push(...commands[CommandType.ConnectVersions]);
+      result[CommandType.ConnectApplicationToRepository].push(...commands[CommandType.ConnectApplicationToRepository]);
 
       return result;
     }, {
       [CommandType.GetOrCreateApplication]: [],
       [CommandType.GetOrCreateApplicationVersion]: [],
       [CommandType.ConnectVersions]: [],
+      [CommandType.ConnectApplicationToRepository]: []
     });
 
     reduced[CommandType.GetOrCreateApplication] = this
       .uniqBy(reduced[CommandType.GetOrCreateApplication], JSON.stringify);
+
+    reduced[CommandType.ConnectApplicationToRepository] = this
+      .uniqBy(reduced[CommandType.ConnectApplicationToRepository], JSON.stringify);
 
     reduced[CommandType.GetOrCreateApplicationVersion] = this
       .uniqBy(reduced[CommandType.GetOrCreateApplicationVersion], (params) => {
@@ -130,6 +141,11 @@ export class WebhookService {
     await Promise.all(commands[CommandType.GetOrCreateApplication]
     .map(({ key }) => {
       return this.applicationService.getOrCreateApplication(key);
+    }));
+
+    await Promise.all(commands[CommandType.ConnectApplicationToRepository]
+    .map(({ key, repositoryRid }) => {
+      return this.applicationService.connectApplicationToRepository(key, repositoryRid);
     }));
 
     await Promise.all(commands[CommandType.GetOrCreateApplicationVersion]

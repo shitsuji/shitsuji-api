@@ -147,4 +147,26 @@ export class ApplicationService {
       return null;
     }
   }
+
+  async connectApplicationToRepository(key: string, repositoryRid: string) {
+    try {
+      return await this.databaseService.db
+        .let('application', this.databaseService.db
+          .select()
+          .from('Application')
+          .where({
+            key
+          })
+        )
+        .let('has', this.databaseService.db
+          .create('EDGE', 'IsIn')
+          .from('$application')
+          .to(repositoryRid)
+        )
+        .commit()
+        .one();
+    } catch (e) {
+      return null;
+    }
+  }
 }
