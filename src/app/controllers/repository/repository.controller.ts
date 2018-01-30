@@ -52,8 +52,8 @@ export class RepositoryController {
 
   @Patch('/:repositoryId')
   async updateById(@Param('repositoryId') repositoryId: string, @Body() body: RepositoryDto) {
-    const { name, url } = body;
-    const data = { name, url };
+    const { name, url, branch } = body;
+    const data = { name, url, branch };
 
     const repository = await this.databaseService.db
       .update(`#${repositoryId}`)
@@ -79,8 +79,8 @@ export class RepositoryController {
     const repository = await this.databaseService.db
       .update(`#${repositoryId}`)
       .set({
-        privateKey,
-        publicKey
+        publicKey,
+        privateKey: encrypted
       })
       .return('AFTER')
       .one();
@@ -107,7 +107,7 @@ export class RepositoryController {
     const applications = await this.getApplications(repositoryId);
 
     return {
-      repository,
+      repository: this.repositoryToDto(repository),
       applications
     };
   }
