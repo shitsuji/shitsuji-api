@@ -53,8 +53,7 @@ export class RepositoryController {
   @Patch('/:repositoryId')
   async updateById(@Param('repositoryId') repositoryId: string, @Body() body: RepositoryDto) {
     const { name, url, branch } = body;
-    const data = { name, url, branch };
-
+    const data = { name, url, branch: branch && branch.length ? branch : 'master' };
     const repository = await this.databaseService.db
       .update(`#${repositoryId}`)
       .set(data)
