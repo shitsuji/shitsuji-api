@@ -70,8 +70,8 @@ export class RepositoryController {
       .one();
   }
 
-  @Post('/:repositoryId/certificate')
-  async createCertificate(@Param('repositoryId') repositoryId: string) {
+  @Post('/:repositoryId/regenerate')
+  async regenerateCertificate(@Param('repositoryId') repositoryId: string) {
     const { privateKey, publicKey } = await this.cryptoService.generateKeypair();
     const encrypted = this.cryptoService.encrypt(privateKey);
 
