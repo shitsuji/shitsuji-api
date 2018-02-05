@@ -172,23 +172,23 @@ export class ApplicationService {
 
   async deleteApplication(applicationId: string) {
     const result = await this.databaseService.db
-      .let('versions', this.databaseService.db
+      .delete('VERTEX Version')
+      .where(`@rid in (${this.databaseService.db
         .select(`out('Has')`)
         .from('Application')
         .where({
           '@rid': `#${applicationId}`
-        })
+        })})`
       )
-      .let('application', this.databaseService.db
-        .select()
-        .from('Application')
-        .where({
-          '@rid': `#${applicationId}`
-        })
-      )
-      .delete(['VERTEX', '$versions'])
-      .delete(['VERTEX', '$application'])
-      .commit()
-      .return('count($versions) + 1');
+      .all();
+
+    const app = await this.databaseService.db
+      .delete(['VERTEX', 'Application'])
+      .where({
+        '@rid': `#${applicationId}`
+      })
+      .one();
+
+    return result && result.length && +(result[0]) + 1;
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, Delete } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApplicationDto } from '../../models/application.dto';
 import { VersionDto } from '../../models/version.dto';
 import { ApplicationService } from '../../services/application/application.service';
@@ -64,9 +64,8 @@ export class ApplicationController {
 
   @Delete('/:applicationId')
   async deleteApplication(@Param('applicationId') applicationId: string) {
-    
-    const res = await this.applicationService.deleteApplication(applicationId);
+    const result = await this.applicationService.deleteApplication(applicationId);
 
-    return res;
+    return { result };
   }
 }

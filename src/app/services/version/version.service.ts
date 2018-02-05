@@ -9,7 +9,7 @@ export class VersionService {
   async getVersionDependers(versionId: string) {
     const result = await this.databaseService.db
       .let('versions', this.databaseService.db
-        .select(`expand(out('DependsOn'))`)
+        .select(`expand(in('DependsOn'))`)
         .from('Version')
         .where({
           '@rid': `#${versionId}`
@@ -30,7 +30,7 @@ export class VersionService {
   async getVersionDependees(versionId: string) {
     const result = await this.databaseService.db
       .let('versions', this.databaseService.db
-        .select(`expand(in('DependsOn'))`)
+        .select(`expand(out('DependsOn'))`)
         .from('Version')
         .where({
           '@rid': `#${versionId}`
