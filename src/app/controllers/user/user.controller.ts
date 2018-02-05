@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { UserDto } from '../../models/user.dto';
 import { AuthService } from '../../services/auth/auth.service';
 import { DatabaseService } from '../../services/database/database.service';
@@ -66,5 +66,16 @@ export class UserController {
       .one();
 
     return this.authService.removePassword(user);
+  }
+
+  @Delete('/:userId')
+  async deleteUser(@Param('userId') userId: string) {
+    return this.databaseService.db
+      .delete()
+      .from('User')
+      .where({
+        '@rid': `#${userId}`
+      })
+      .one();
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch } from '@nestjs/common';
 import { VersionDto } from '../../models/version.dto';
 import { DatabaseService } from '../../services/database/database.service';
 import { VersionService } from '../../services/version/version.service';
@@ -33,5 +33,15 @@ export class VersionController {
   @Get('/:versionId/dependees')
   async getDependees(@Param('versionId') versionId: string) {
     return this.versionService.getVersionDependees(versionId);
+  }
+
+  @Delete('/:versionId')
+  async deleteVersion(@Param('versionId') versionId: string) {
+    return this.databaseService.db
+      .delete(['VERTEX', 'Version'])
+      .where({
+        '@rid': `#${versionId}`
+      })
+      .one();
   }
 }

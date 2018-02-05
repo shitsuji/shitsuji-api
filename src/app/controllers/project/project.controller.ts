@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
 import * as Bluebird from 'bluebird';
 import { Statement } from 'orientjs';
 import { ApplicationDto } from '../../models/application.dto';
@@ -92,5 +92,15 @@ export class ProjectController {
       .commit()
       .return('$applications')
       .all();
+  }
+
+  @Delete('/:projectId')
+  async deleteProject(@Param('projectId') projectId: string) {
+    return this.databaseService.db
+      .delete(['VERTEX', 'Project'])
+      .where({
+        '@rid': `#${projectId}`
+      })
+      .one();
   }
 }

@@ -63,13 +63,6 @@ export class RepositoryController {
     return this.repositoryToDto(repository);
   }
 
-  @Delete('/:repositoryId')
-  async deleteById(@Param('repositoryId') repositoryId: string) {
-    return this.databaseService.db
-      .delete(`#${repositoryId}`)
-      .one();
-  }
-
   @Post('/:repositoryId/regenerate')
   async regenerateCertificate(@Param('repositoryId') repositoryId: string) {
     const { privateKey, publicKey } = await this.cryptoService.generateKeypair();
@@ -120,6 +113,16 @@ export class RepositoryController {
         '@rid': `#${repositoryId}`
       })
       .all();
+  }
+
+  @Delete('/:repositoryId')
+  async deleteRepository(@Param('repositoryId') repositoryId: string) {
+    return this.databaseService.db
+      .delete(['VERTEX', 'Repository'])
+      .where({
+        '@rid': `#${repositoryId}`
+      })
+      .one();
   }
 
   private repositoryToDto(repository) {
