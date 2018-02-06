@@ -31,7 +31,7 @@ export class ApplicationController {
 
   @Post('/')
   async create(@Body() applicationDto: ApplicationDto) {
-    this.applicationService.createApplication(applicationDto);
+    return this.applicationService.createApplication(applicationDto);
   }
 
   @Patch('/:applicationId')
