@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApplicationDto } from '../../models/application.dto';
 import { VersionDto } from '../../models/version.dto';
 import { ApplicationService } from '../../services/application/application.service';
@@ -59,6 +59,14 @@ export class ApplicationController {
 
   @Post('/:applicationId/versions')
   async addVersion(@Body() versionDto: VersionDto, @Param('applicationId') applicationId: string) {
+    const result = await this.applicationService.getApplicationVersion({
+      '@rid': `#${applicationId}`
+    }, versionDto);
+
+    if (result) {
+      throw new HttpException('Specified version already exist', HttpStatus.BAD_REQUEST);
+    }
+
     return this.applicationService.addApplicationVersion(versionDto, applicationId);
   }
 

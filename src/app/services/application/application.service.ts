@@ -77,14 +77,12 @@ export class ApplicationService {
     return result;
   }
 
-  async getOrCreateApplicationVersion(applicationKey: string, versionDto: VersionCreateDto) {
+  async getApplicationVersion(where: { key?: string, '@rid'?: string }, versionDto: VersionCreateDto) {
     const result = await this.databaseService.db
       .let('versions', this.databaseService.db
         .select(`expand(out('Has'))`)
         .from('Application')
-        .where({
-          key: applicationKey
-        })
+        .where(where)
       )
       .let('version', this.databaseService.db
         .select()
@@ -96,6 +94,12 @@ export class ApplicationService {
       .commit()
       .return('$version')
       .one() as VersionDto;
+
+    return result;
+  }
+
+  async getOrCreateApplicationVersion(applicationKey: string, versionDto: VersionCreateDto) {
+    const result = await this.getApplicationVersion({ key: applicationKey }, versionDto);
 
     if (result) {
       return result;
