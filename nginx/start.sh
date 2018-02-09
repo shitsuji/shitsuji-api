@@ -6,5 +6,5 @@ fi
 if [ -n "${PROXY_PORT}" ]; then
   PROXY_SERVICE="${PROXY_SERVICE}:${PROXY_PORT}"
 fi
-sed -i "s/{{PROXY_SERVICE}}/${PROXY_SERVICE}/g;" /etc/nginx/conf.d/proxy.conf
+sed -i "s~{{PROXY_SERVICE}}~${PROXY_SERVICE}~g;" /etc/nginx/conf.d/proxy.conf
 nginx -g 'daemon off;'
