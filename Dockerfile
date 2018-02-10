@@ -8,6 +8,6 @@ EXPOSE 3000
 
 COPY . .
 
-RUN npm install
+RUN npm install && npm run build
 
-CMD [ "npm", "run", "serve" ]
+ENTRYPOINT ["docker-entrypoint.sh"]

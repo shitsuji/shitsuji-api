@@ -12,37 +12,30 @@ services:
       - db_config:/orientdb/config
       - db_data:/orientdb/databases
       - db_backup:/orientdb/backup
-  proxy:
-    build:
-      context: ./nginx
+  app:
+    build: .
+    depends_on:
+      - db
     ports:
-      - "80:80"
-      - "443:443"
-    secrets:
-      - proxy_cert
-      - proxy_dhparam
-      - proxy_key
+      - "5000:5000"
+    volumes:
+      - .:/shitsuji
     environment:
-      PROXY_HOST: "${HOST_IP}"
-      PROXY_PORT: 5000
-  # app:
-  #   build: .
-  #   depends_on:
-  #     - db
-  #   ports:
-  #     - "5000:5000"
-  #   volumes:
-  #     - .:/shitsuji
+      # SHITSUJI_CONFIG_FILE: # location of config file for the api itself
+      # SHITSUJI_CONFIG_STORAGE_PATH: # path where the repositories are going to be saved
+      # SHITSUJI_CONFIG_SECRET: # secret phrase used to 
+      # SHITSUJI_REPOSITORY_CONFIG_FILE_PATH: # location of config file, together with name of the file in you projects
+      # ORIENTDB_OPTS_FILE
+      # ORIENTDB_HOST:
+      # ORIENTDB_PORT:
+      # ORIENTDB_USER:
+      # ORIENTDB_PASSWORD:
+      # ORIENTDB_DB_NAME:
+      # ORIENTDB_DB_USER:
+      # ORIENTDB_DB_PASSWORD:
+
 
 volumes:
   db_config:
   db_data:
   db_backup:
-
-secrets:
-  proxy_cert:
-    file: ./nginx/secrets/cert.crt
-  proxy_dhparam:
-    file: ./nginx/secrets/dhparam.pem
-  proxy_key:
-    file: ./nginx/secrets/key.pem
