@@ -22,11 +22,11 @@ services:
       - .:/shitsuji
     environment:
       # SHITSUJI_CONFIG_FILE: # location of config file for the api itself
-      # SHITSUJI_CONFIG_STORAGE_PATH: # path where the repositories are going to be saved
-      # SHITSUJI_CONFIG_SECRET: # secret phrase used to 
+      # SHITSUJI_CONFIG_STORAGE_PATH: # path where the repositories are going to be saved - absolute path!
+      # SHITSUJI_CONFIG_SECRET: # secret phrase used to generate hash of password
       # SHITSUJI_REPOSITORY_CONFIG_FILE_PATH: # location of config file, together with name of the file in you projects
-      # ORIENTDB_OPTS_FILE
-      # ORIENTDB_HOST:
+      # ORIENTDB_OPTS_FILE:
+      ORIENTDB_HOST: db
       # ORIENTDB_PORT:
       # ORIENTDB_USER:
       # ORIENTDB_PASSWORD:

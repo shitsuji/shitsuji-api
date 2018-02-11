@@ -10,4 +10,4 @@ COPY . .
 
 RUN npm install && npm run build
 
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "docker-entrypoint.sh"]

@@ -1,17 +1,12 @@
-import { Component } from '@nestjs/common';
+import { Component, Inject } from '@nestjs/common';
 import { ODatabase } from 'orientjs';
+import { DATABASE_CONFIG } from '../../constants';
 
 @Component()
 export class DatabaseService {
   db: ODatabase;
 
-  constructor() {
-    this.db = new ODatabase({
-      host: 'localhost',
-      port: 2424,
-      username: 'root',
-      password: 'shitsuji',
-      name: 'shitsuji'
-    });
+  constructor(@Inject(DATABASE_CONFIG) databaseConfig) {
+    this.db = new ODatabase(databaseConfig);
   }
 }
