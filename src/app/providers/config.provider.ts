@@ -5,14 +5,20 @@ import { CONFIG, CONFIG_DEFAULTS } from '../constants';
 import { ShitsujiConfig } from '../models/config.model';
 
 export async function configFactory() {
-  const rootDir = process.env.ROOT_DIR || `${__dirname}/../../..`;
-  const defaultConfigPath = path.join(rootDir, 'shitsujiconfig.json');
+  const defaultConfigPath = path.join(process.env.ROOT_DIR, 'shitsujiconfig.json');
   const desiredConfigPath = process.env.SHITSUJI_CONFIG_FILE || defaultConfigPath;
 
-  const configData = await util.promisify(fs.readFile)(
-    desiredConfigPath,
-    { encoding: 'utf8' }
-  );
+  let configData;
+  
+  try {
+    configData = await util.promisify(fs.readFile)(
+      desiredConfigPath,
+      { encoding: 'utf8' }
+    );
+  } catch (e) {
+    console.log('Shitsuji config not found, continuing with defaults ...');
+    configData = {};
+  }
 
   const config: ShitsujiConfig = {
     ...CONFIG_DEFAULTS,
@@ -20,14 +26,14 @@ export async function configFactory() {
   };
 
   if (process.env.SHITSUJI_CONFIG_STORAGE_PATH) {
-    config.storagePath = process.env.SHITSUJI_CONFIG_STORAGE_PATH;
+    config.storagePath = path.relative(process.env.SHITSUJI_CONFIG_STORAGE_PATH, process.env.ROOT_DIR);
+  } else {
+    config.storagePath = path.join(process.env.ROOT_DIR, config.storagePath);
   }
 
   if (process.env.SHITSUJI_CONFIG_SECRET) {
     config.secret = process.env.SHITSUJI_CONFIG_SECRET;
   }
-
-  config.storagePath = path.join(rootDir, config.storagePath);
 
   return config;
 }

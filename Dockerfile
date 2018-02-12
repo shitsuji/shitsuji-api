@@ -1,13 +1,16 @@
-FROM 'node:8-wheezy'
+FROM 'node:8-stretch'
 
 WORKDIR /shitsuji
 EXPOSE 3000
 
-# RUN apt-get update && apt-get install --no-install-recommends --no-install-suggests -y build-essential \
-#     && rm -rf /var/lib/apt/lists/*
-
+RUN apt-get update \
+    && apt-get install \
+    --no-install-recommends --no-install-suggests -y \
+    realpath build-essential libstdc++-6-dev \
+    && rm -rf /var/lib/apt/lists/*
+COPY ./package.json .
+RUN npm install
 COPY . .
+RUN npm run build
 
-RUN npm install && npm run build
-
-ENTRYPOINT ["/bin/sh", "docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "docker-entrypoint.sh"]

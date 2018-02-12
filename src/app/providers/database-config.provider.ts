@@ -5,19 +5,29 @@ import { parse } from 'yargs';
 import { DATABASE_CONFIG, DATABASE_CONFIG_DEFAULTS } from '../constants';
 
 export async function databaseConfigFactory() {
-  const rootDir = process.env.ROOT_DIR || `${__dirname}/../../..`;
-  const defaultConfigPath = path.join(rootDir, 'orientjs.opts');
+  const defaultConfigPath = path.join(process.env.ROOT_DIR, 'orientjs.opts');
   const desiredConfigPath = process.env.ORIENTDB_OPTS_FILE || defaultConfigPath;
 
-  const rawConfig = await util.promisify(fs.readFile)(
-    desiredConfigPath,
-    { encoding: 'utf8' }
-  );
+  let rawConfig;
+
+  try {
+    rawConfig = await util.promisify(fs.readFile)(
+      desiredConfigPath,
+      { encoding: 'utf8' }
+    );
+  } catch (e) {
+    console.log('Database config not found, continuing with defaults ...');
+    rawConfig = '';
+  }
+
+
   const parsedConfig = parseOptsFile(rawConfig);
   const configKeys = Object.keys(DATABASE_CONFIG_DEFAULTS);
   const config = {
-    ...DATABASE_CONFIG_DEFAULTS,
-    ...configKeys.reduce((acc, key) => ({ ...acc, [key]: parsedConfig[key] }), {})
+    ...configKeys.reduce((acc, key) => ({
+      ...acc,
+      [key]: parsedConfig[key] || DATABASE_CONFIG_DEFAULTS[key]
+    }), {}) as typeof DATABASE_CONFIG_DEFAULTS
   };
 
   if (process.env.ORIENTDB_HOST) {

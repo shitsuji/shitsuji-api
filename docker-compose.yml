@@ -3,10 +3,10 @@ version: "3.4"
 services:
   db:
     image: orientdb:2.2.30
-    ports: 
-      - "2424:2424"
-      - "2480:2480"
-    environment: 
+    # ports: 
+    #   - "2424:2424"
+    #   - "2480:2480"
+    environment:
       ORIENTDB_ROOT_PASSWORD: shitsuji
     volumes:
       - db_config:/orientdb/config
@@ -19,23 +19,31 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - .:/shitsuji
+      - shitsuji_storage:/shitsuji/storage
     environment:
-      # SHITSUJI_CONFIG_FILE: # location of config file for the api itself
-      # SHITSUJI_CONFIG_STORAGE_PATH: # path where the repositories are going to be saved - absolute path!
-      # SHITSUJI_CONFIG_SECRET: # secret phrase used to generate hash of password
-      # SHITSUJI_REPOSITORY_CONFIG_FILE_PATH: # location of config file, together with name of the file in you projects
-      # ORIENTDB_OPTS_FILE:
+      # location of config file for the api itself
+      # SHITSUJI_CONFIG_FILE:
+      
+      # path where the repositories are going to be saved - absolute path!
+      SHITSUJI_CONFIG_STORAGE_PATH: /shitsuji/storage
+      
+      # secret phrase used to generate hash of password
+      # SHITSUJI_CONFIG_SECRET:
+      
+      # location of config file, together with name of the file in you projects
+      # SHITSUJI_REPOSITORY_CONFIG_FILE_PATH:
+      
       ORIENTDB_HOST: db
       # ORIENTDB_PORT:
       # ORIENTDB_USER:
       # ORIENTDB_PASSWORD:
-      # ORIENTDB_DB_NAME:
-      # ORIENTDB_DB_USER:
-      # ORIENTDB_DB_PASSWORD:
+      ORIENTDB_DB_NAME: test
+      ORIENTDB_DB_USER: root
+      ORIENTDB_DB_PASSWORD: shitsuji
 
 
 volumes:
   db_config:
   db_data:
   db_backup:
+  shitsuji_storage:

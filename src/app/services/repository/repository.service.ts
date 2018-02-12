@@ -93,7 +93,7 @@ export class RepositoryService {
   }
 
   private getRepositoryPath(repositoryName: string) {
-    return path.join(this.config.storagePath, repositoryName);
+    return path.resolve(this.config.storagePath, repositoryName);
   }
 
   private getCloneOptions(keypair: Keypair): CloneOptions {

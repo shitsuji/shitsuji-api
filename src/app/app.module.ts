@@ -26,6 +26,7 @@ import { JwtStrategyService } from './services/jwt-strategy/jwt-strategy.service
 import { RepositoryService } from './services/repository/repository.service';
 import { VersionService } from './services/version/version.service';
 import { WebhookService } from './services/webhook/webhook.service';
+import { databaseConfigProvider } from './providers/database-config.provider';
 
 @Module({
   controllers: [
@@ -49,6 +50,7 @@ import { WebhookService } from './services/webhook/webhook.service';
     JsonWebTokenProvider,
     PassportProvider,
     PassportJwtProvider,
+    databaseConfigProvider,
 
     DatabaseService,
     RepositoryService,
